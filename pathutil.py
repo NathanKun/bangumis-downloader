@@ -30,17 +30,17 @@ def is_pathname_valid(pathname: str) -> bool:
         # if any. Since Windows prohibits path components from containing `:`
         # characters, failing to strip this `:`-suffixed prefix would
         # erroneously invalidate all valid absolute Windows pathnames.
-        _, pathname = os.path.splitdrive(pathname)
+        root_dirname, pathname = os.path.splitdrive(pathname)
 
         # Directory guaranteed to exist. If the current OS is Windows, this is
         # the drive to which Windows was installed (e.g., the "%HOMEDRIVE%"
         # environment variable); else, the typical root directory.
-        root_dirname = os.environ.get('HOMEDRIVE', 'C:') \
+        '''root_dirname = os.environ.get('HOMEDRIVE', 'C:') \
             if sys.platform == 'win32' else os.path.sep
-        assert os.path.isdir(root_dirname)   # ...Murphy and her ironclad Law
+        assert os.path.isdir(root_dirname)   # ...Murphy and her ironclad Law'''
 
         # Append a path separator to this directory if needed.
-        root_dirname = root_dirname.rstrip(os.path.sep) + os.path.sep
+        '''root_dirname = root_dirname.rstrip(os.path.sep) + os.path.sep'''
 
         # Test whether each path component split from this pathname is valid or
         # not, ignoring non-existent and non-readable path components.

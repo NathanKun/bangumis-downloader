@@ -50,7 +50,8 @@ def crawl(url, groupName, titleMustContains=""):
     
     trs = table.find("tbody").find_all("tr")
     if(len(trs) == 0):
-        raise Exception("No result: len(trs) == 0")
+        #raise Exception("No result: len(trs) == 0")
+        log("No result for url = " + url)
     
     for tr in trs:
         strs = tr.strings
@@ -96,31 +97,36 @@ def main(argv):
             return
         elif opt == "-p":
             htmlSaveToPath = arg
-            print("Path input: " + htmlSaveToPath)
             if not pathutil.is_path_exists_or_creatable(htmlSaveToPath):
-                print("Path not valid")
+                log("Path not valid")
                 return
+            log("Path to save the html file: " + htmlSaveToPath + "/bmu.html")
     
     if htmlSaveToPath == '':
-        print("No path in input, use -p PATH to save the html file generated, or result will be print to output directly.")
+        log("No path in input, use -p PATH to save the html file generated, or result will be print to output directly.")
     
     
     # targets to crawl
     targets = [{
+                # 骨傲天3
                 "url": "https://share.dmhy.org/topics/list?keyword=overlord+III+1080",
                 "group": "YMDR"
             }, {
+                # 后街女孩
                 "url": "https://share.dmhy.org/topics/list?keyword=%E5%90%8E%E8%A1%97%E5%A5%B3%E5%AD%A9+1080",
                 "group": "咪梦动漫组"
             }, {
+                # 千绪的通学路
                 "url": "https://share.dmhy.org/topics/list?keyword=%E5%8D%83%E7%BB%AA%E7%9A%84%E9%80%9A%E5%AD%A6%E8%B7%AF+1080",
                 "group": "极影字幕社",
                 "keyword": "GB"
             }, {
+                # 杀戮天使
                 "url": "https://share.dmhy.org/topics/list?keyword=angel+of+death+1080",
                 "group": "YMDR"
             }, {
-                "url": "https://share.dmhy.org/topics/list?keyword=%E5%A4%A9%E7%8B%BC+1080",
+                # 天狼
+                "url": "https://share.dmhy.org/topics/list?keyword=%E5%A4%A9%E7%8B%BC+1080", 
                 "group": "YMDR"
             }]
     
@@ -145,7 +151,7 @@ def main(argv):
         
     resultPage = '''
             <!doctype html>
-            <html lang="en">
+            <html lang="zh-cmn">
             
             <head>
               <meta charset="utf-8">
@@ -166,16 +172,19 @@ def main(argv):
             '''.format(htmlRows)
     
     resultPage = BeautifulSoup(resultPage, "lxml").prettify()
-    print(resultPage)
+
     if htmlSaveToPath == '':
+        log("Result Page:")
         print(resultPage)
     else:
         if not os.path.exists(htmlSaveToPath):
             os.mkdir(htmlSaveToPath)
             
-        file = open(htmlSaveToPath + "/bmu.html", 'w', encoding='utf8')
+        file = open(htmlSaveToPath + "/bmu.html", 'w+', encoding='utf8')
         file.write(resultPage)
         file.close()
+        
+    log("Finished")
 
 if __name__ == "__main__":
     from bs4 import BeautifulSoup
