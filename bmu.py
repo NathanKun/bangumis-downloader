@@ -154,22 +154,52 @@ def main(argv):
             <html lang="zh-cmn">
             
             <head>
-              <meta charset="utf-8">
-              <meta http-equiv="x-ua-compatible" content="ie=edge">
-              <meta name="viewport" content="width=device-width, initial-scale=1">
-              <title>Bangumis Magnet Uri</title>
+                <meta charset="utf-8">
+                <meta http-equiv="x-ua-compatible" content="ie=edge">
+                <meta name="viewport" content="width=device-width, initial-scale=1">
+                <title>Bangumis Magnet Uri</title>
+                <style>
+                .zui-table {{
+                      border: solid 1px #DDEEEE;
+                      border-collapse: collapse;
+                      border-spacing: 0;
+                      font: normal 13px Arial, sans-serif;
+                  }}
+                  .zui-table thead th {{
+                      background-color: #DDEFEF;
+                      border: solid 1px #DDEEEE;
+                      color: #336B6B;
+                      padding: 10px;
+                      text-align: left;
+                      text-shadow: 1px 1px 1px #fff;
+                  }}
+                  .zui-table tbody td {{
+                      border: solid 1px #DDEEEE;
+                      color: #333;
+                      padding: 10px;
+                      text-shadow: 1px 1px 1px #fff;
+                  }}
+                </style>
             </head>
             
             <body>
-                <table>
-                    <thead></thead>
+                <h3>Last Run At: {0}</h3>
+                <table class="zui-table">
+                    <thead><tr>
+                        <th>上传时间⏰</th>
+                        <th>字幕组</th>
+                        <th>标题📃</th>
+                        <th>磁链</th>
+                        <th>大小</th>
+                        <th>搜索🔍</th>
+                    </tr></thead>
                     <tbody>
-                        {0}
+                        {1}
                     </tbody>
                 </table>
             </body>
             </html>
-            '''.format(htmlRows)
+            '''.format('{0:%Y-%m-%d_%H:%M:%S}'.format(datetime.datetime.now()), htmlRows)
     
     resultPage = BeautifulSoup(resultPage, "lxml").prettify()
 
