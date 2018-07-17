@@ -33,6 +33,12 @@ class Bangumi:
                                 self.size,
                                 self.searchUrl)
     
+
+def log(logStr):
+    timeStr = '{0:%Y-%m-%d_%H:%M:%S.%f}'.format(datetime.datetime.now())[:-3] + ": "
+    logStr = timeStr + logStr
+    print(logStr)
+
 def crawl(url, groupName, titleMustContains=""):
     f = urllib.request.urlopen(url)
     soup = BeautifulSoup(f.read().decode("utf-8"), "lxml")
@@ -77,19 +83,67 @@ def crawl(url, groupName, titleMustContains=""):
             
             return Bangumi(uploadedAt, group, title, magnetUri, size, postUrl, url)
 
-def main():
+def main(argv):
+    
+    # inputs
+    htmlSaveToPath = ''
+    opts, _ = getopt.getopt(argv, "hp:")
+    for opt, arg in opts:
+        if opt == "-h":
+            print("BangumisMagnetUri.py [option]")
+            print(' -h Help')
+            print(' -p Path to save the html file generated, if not specified, will print to output directly')
+            return
+        elif opt == "-p":
+            htmlSaveToPath = arg
+            print("Path input: " + htmlSaveToPath)
+            if not pathutil.is_path_exists_or_creatable(htmlSaveToPath):
+                print("Path not valid")
+                return
+    
+    if htmlSaveToPath == '':
+        print("No path in input, use -p PATH to save the html file generated, or result will be print to output directly.")
+    
+    
+    # targets to crawl
+    targets = [{
+                "url": "https://share.dmhy.org/topics/list?keyword=overlord+III+1080",
+                "group": "YMDR"
+            }, {
+                "url": "https://share.dmhy.org/topics/list?keyword=%E5%90%8E%E8%A1%97%E5%A5%B3%E5%AD%A9+1080",
+                "group": "咪梦动漫组"
+            }, {
+                "url": "https://share.dmhy.org/topics/list?keyword=%E5%8D%83%E7%BB%AA%E7%9A%84%E9%80%9A%E5%AD%A6%E8%B7%AF+1080",
+                "group": "极影字幕社",
+                "keyword": "GB"
+            }, {
+                "url": "https://share.dmhy.org/topics/list?keyword=angel+of+death+1080",
+                "group": "YMDR"
+            }, {
+                "url": "https://share.dmhy.org/topics/list?keyword=%E5%A4%A9%E7%8B%BC+1080",
+                "group": "YMDR"
+            }]
+    
+    
+    # Crawl
+    log("Crawling...")
+    
     rows = []
-    rows.append(crawl("https://share.dmhy.org/topics/list?keyword=overlord+III+1080", "YMDR"))
-    rows.append(crawl("https://share.dmhy.org/topics/list?keyword=%E5%90%8E%E8%A1%97%E5%A5%B3%E5%AD%A9+1080", "咪梦动漫组"))
-    rows.append(crawl("https://share.dmhy.org/topics/list?keyword=%E5%8D%83%E7%BB%AA%E7%9A%84%E9%80%9A%E5%AD%A6%E8%B7%AF+1080", "极影字幕社", "GB"))
-    rows.append(crawl("https://share.dmhy.org/topics/list?keyword=angel+of+death+1080", "YMDR"))
-    rows.append(crawl("https://share.dmhy.org/topics/list?keyword=%E5%A4%A9%E7%8B%BC+1080", "YMDR"))
+    for t in targets:
+        if("keyword" in t):
+            rows.append(crawl(t["url"], t["group"], t["keyword"]))
+        else:
+            rows.append(crawl(t["url"], t["group"]))
+    
+    
+    # Generate result
+    log("Generating result...")
     
     htmlRows = ""
     for r in rows:
         htmlRows = htmlRows + r.toHtmlTableRow()
         
-    print ('''
+    resultPage = '''
             <!doctype html>
             <html lang="en">
             
@@ -97,29 +151,38 @@ def main():
               <meta charset="utf-8">
               <meta http-equiv="x-ua-compatible" content="ie=edge">
               <meta name="viewport" content="width=device-width, initial-scale=1">
-            
               <title>Bangumis Magnet Uri</title>
-            
-              <link rel="stylesheet" href="css/main.css">
-              <link rel="icon" href="images/favicon.png">
             </head>
             
             <body>
                 <table>
                     <thead></thead>
                     <tbody>
-            ''' + 
-            htmlRows + 
-            '''
+                        {0}
                     </tbody>
                 </table>
             </body>
             </html>
-            ''')
+            '''.format(htmlRows)
+    
+    resultPage = BeautifulSoup(resultPage, "lxml").prettify()
+    print(resultPage)
+    if htmlSaveToPath == '':
+        print(resultPage)
+    else:
+        if not os.path.exists(htmlSaveToPath):
+            os.mkdir(htmlSaveToPath)
+            
+        file = open(htmlSaveToPath + "/bmu.html", 'w', encoding='utf8')
+        file.write(resultPage)
+        file.close()
 
 if __name__ == "__main__":
     from bs4 import BeautifulSoup
     import urllib.request
+    import datetime
+    import os, sys, getopt
+    import pathutil
     
-    main()
+    main(sys.argv[1:])
     
