@@ -8,7 +8,7 @@ __version__ = "1.0"
 __maintainer = "Junyang HE,"
 
 class Bangumi:
-    def __init__(self, uploadedAt, group, title, magnetUri, size, postUrl, searchUrl):
+    def __init__(self, uploadedAt: str, group: str, title: str, magnetUri: str, size: str, postUrl: str, searchUrl: str):
         self.uploadedAt = uploadedAt
         self.group = group
         self.title = title
@@ -34,32 +34,38 @@ class Bangumi:
                                 self.searchUrl)
     
 
-def log(logStr):
+def log(logStr: str):
     timeStr = '{0:%Y-%m-%d_%H:%M:%S.%f}'.format(datetime.datetime.now())[:-3] + ": "
     logStr = timeStr + logStr
     print(logStr)
 
-def crawl(url, groupName, titleMustContains=""):
-    f = urllib.request.urlopen(url)
-    soup = BeautifulSoup(f.read().decode("utf-8"), "lxml")
+def crawl(url: str, groupName: str, titleMustContains = ""):
+    episodes = [] # to return all found Bangumi objects
+    f = urllib.request.urlopen(url) # request
+    soup = BeautifulSoup(f.read().decode("utf-8"), "lxml") # bs4
     
-    table = soup.find_all(id="topic_list")
+    table = soup.find_all(id="topic_list") # <table> which contains all search results
     if(len(table) != 1):
         raise Exception("Cannot find result table: len(table) = " + len(table))
     table = table[0]
     
-    trs = table.find("tbody").find_all("tr")
+    trs = table.find("tbody").find_all("tr") # get all table rows
     if(len(trs) == 0):
         #raise Exception("No result: len(trs) == 0")
         log("No result for url = " + url)
     
+    # foreach row
     for tr in trs:
         strs = tr.strings
         found = False
+        
+        # check if the specified fansub group name is in this row
         for s in strs:
             if groupName in s:
                 found = True
                 break
+        
+        # if the fansub group name is in this row, extract all info needed to create a Banguli object, and add to array
         if found:
             tds = tr.find_all("td")
             uploadedAt = next(tds[0].strings).string.replace("\n", "").replace("\t", "")
@@ -82,7 +88,11 @@ def crawl(url, groupName, titleMustContains=""):
             magnetUri = tds[3].find("a")["href"]
             size = tds[4].string
             
-            return Bangumi(uploadedAt, group, title, magnetUri, size, postUrl, url)
+            episodes.append(Bangumi(uploadedAt, group, title, magnetUri, size, postUrl, url))
+        # if found: END
+    # for tr in trs:
+    return episodes
+         
 
 def main(argv):
     
@@ -108,46 +118,66 @@ def main(argv):
     
     # targets to crawl
     targets = [{
-                # 骨傲天3
+                "name": "骨傲天3",
                 "url": "https://share.dmhy.org/topics/list?keyword=overlord+III+1080",
                 "group": "YMDR"
             }, {
-                # 后街女孩
+                "name": "后街女孩",
                 "url": "https://share.dmhy.org/topics/list?keyword=%E5%90%8E%E8%A1%97%E5%A5%B3%E5%AD%A9+1080",
                 "group": "咪梦动漫组"
             }, {
-                # 千绪的通学路
+                "name": "千绪的通学路",
                 "url": "https://share.dmhy.org/topics/list?keyword=%E5%8D%83%E7%BB%AA%E7%9A%84%E9%80%9A%E5%AD%A6%E8%B7%AF+1080",
                 "group": "极影字幕社",
                 "keyword": "GB"
             }, {
-                # 杀戮天使
+                "name": "杀戮天使",
                 "url": "https://share.dmhy.org/topics/list?keyword=angel+of+death+1080",
                 "group": "YMDR"
             }, {
-                # 天狼
+                "name": "天狼",
                 "url": "https://share.dmhy.org/topics/list?keyword=%E5%A4%A9%E7%8B%BC+1080", 
                 "group": "YMDR"
             }]
     
-    
     # Crawl
     log("Crawling...")
     
-    rows = []
+    htmlTables = ""
     for t in targets:
         if("keyword" in t):
-            rows.append(crawl(t["url"], t["group"], t["keyword"]))
+            episodes = crawl(t["url"], t["group"], t["keyword"])
         else:
-            rows.append(crawl(t["url"], t["group"]))
-    
+            episodes = crawl(t["url"], t["group"])
+                              
+        if len(episodes) == 0:
+            continue
+        
+        htmlRows = ""
+        for e in episodes:
+            htmlRows = htmlRows + e.toHtmlTableRow()
+            
+        htmlTable = '''
+                <h4>{0}</h4>
+                <table class="zui-table">
+                    <thead><tr>
+                        <th>上传时间⏰</th>
+                        <th>字幕组</th>
+                        <th>标题📃</th>
+                        <th>磁链</th>
+                        <th>大小</th>
+                        <th>搜索🔍</th>
+                    </tr></thead>
+                    <tbody>
+                        {1}
+                    </tbody>
+                </table>'''.format(t["name"], htmlRows)
+                
+        htmlTables = htmlTables + htmlTable
     
     # Generate result
     log("Generating result...")
     
-    htmlRows = ""
-    for r in rows:
-        htmlRows = htmlRows + r.toHtmlTableRow()
         
     resultPage = '''
             <!doctype html>
@@ -164,6 +194,7 @@ def main(argv):
                       border-collapse: collapse;
                       border-spacing: 0;
                       font: normal 13px Arial, sans-serif;
+                      margin-bottom: 5vh;
                   }}
                   .zui-table thead th {{
                       background-color: #DDEFEF;
@@ -184,22 +215,10 @@ def main(argv):
             
             <body>
                 <h3>Last Run At: {0}</h3>
-                <table class="zui-table">
-                    <thead><tr>
-                        <th>上传时间⏰</th>
-                        <th>字幕组</th>
-                        <th>标题📃</th>
-                        <th>磁链</th>
-                        <th>大小</th>
-                        <th>搜索🔍</th>
-                    </tr></thead>
-                    <tbody>
-                        {1}
-                    </tbody>
-                </table>
+                {1}
             </body>
             </html>
-            '''.format('{0:%Y-%m-%d_%H:%M:%S}'.format(datetime.datetime.now()), htmlRows)
+            '''.format('{0:%Y-%m-%d_%H:%M:%S}'.format(datetime.datetime.now()), htmlTables)
     
     resultPage = BeautifulSoup(resultPage, "lxml").prettify()
 
