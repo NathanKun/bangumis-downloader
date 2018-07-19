@@ -40,7 +40,7 @@ def handleInput(argv):
         if opt == "-h":
             print("BangumisMagnetUri.py [option]")
             print(' -h Help')
-            print(' -p Path to save the html file generated, if not specified, will print to output directly')
+            print(' -p Path to save the html and the json file generated, if not specified, will print to output directly')
             return False, ""
         elif opt == "-p":
             htmlSaveToPath = arg
@@ -48,6 +48,7 @@ def handleInput(argv):
                 log("Path not valid")
                 return False, ""
             log("Path to save the html file: " + htmlSaveToPath + "/bmu.html")
+            log("Path to save the json file: " + htmlSaveToPath + "/bmu.json")
     
     if htmlSaveToPath == '':
         log("No path in input, use -p PATH to save the html file generated, or result will be print to output directly.")
@@ -65,7 +66,7 @@ def main(argv):
     
     # Crawl
     log("Crawling...")
-    htmlTables = crawlTargets(targets)
+    htmlTables, jsonArray = crawlTargets(targets)
     
     
     # Generate result
@@ -78,12 +79,18 @@ def main(argv):
     if htmlSaveToPath == '':
         log("Result Page:")
         print(resultPage)
+        log("Result Json:")
+        print(jsonArray)
     else:
         if not os.path.exists(htmlSaveToPath):
             os.mkdir(htmlSaveToPath)
             
         file = open(htmlSaveToPath + "/bmu.html", 'w+', encoding='utf8')
         file.write(resultPage)
+        file.close()
+            
+        file = open(htmlSaveToPath + "/bmu.json", 'w+', encoding='utf8')
+        file.write(jsonArray)
         file.close()
         
     log("Finished")

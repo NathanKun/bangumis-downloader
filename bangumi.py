@@ -26,8 +26,8 @@ class Bangumi:
         return json.dumps(bangumis, cls=BangumiEncoder)
     
     @staticmethod
-    def jsonToList(json):
-        BangumiDecoder.decode(json)
+    def jsonToList(jsonStr):
+        BangumiDecoder.decode(jsonStr)
 
 
 class BangumiEncoder(JSONEncoder):
@@ -37,32 +37,15 @@ class BangumiEncoder(JSONEncoder):
         
 class BangumiDecoder():
     @staticmethod
-    def from_json(json):
-        uploadedAt = ""
-        group = ""
-        title = ""
-        magnetUri = ""
-        size = ""
-        postUrl = ""
-        searchUrl = ""
-        torrentUrl = ""
-        
-        if 'uploadedAt' in json:
-            uploadedAt = json["uploadedAt"]
-        if 'group' in json:
-            group = json["group"]
-        if 'title' in json:
-            title = json["title"]
-        if 'magnetUri' in json:
-            magnetUri = json["magnetUri"]
-        if 'size' in json:
-            size = json["size"]
-        if 'postUrl' in json:
-            postUrl = json["postUrl"]
-        if 'searchUrl' in json:
-            searchUrl = json["searchUrl"]
-        if 'torrentUrl' in json:
-            torrentUrl = json["torrentUrl"]
+    def from_json(jsonStr):
+        uploadedAt = jsonStr["uploadedAt"] if 'uploadedAt' in jsonStr else ""
+        group = jsonStr["group"] if 'group' in jsonStr else ""
+        title = jsonStr["title"] if 'title' in jsonStr else ""
+        magnetUri = jsonStr["magnetUri"] if 'magnetUri' in jsonStr else ""
+        size = jsonStr["size"] if 'size' in jsonStr else ""
+        postUrl = jsonStr["postUrl"] if 'postUrl' in jsonStr else ""
+        searchUrl = jsonStr["searchUrl"] if 'searchUrl' in jsonStr else ""
+        torrentUrl = jsonStr["torrentUrl"] if 'torrentUrl' in jsonStr else ""
         
         return Bangumi(uploadedAt, group, title, magnetUri, size, postUrl, searchUrl, torrentUrl)
     

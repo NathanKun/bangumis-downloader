@@ -144,11 +144,12 @@ def crawlTargets(targets):
     for i in range(len(targets)):
         threads[i].join()
     
-    # concat all tables
+    # to html, concat all tables
     htmlTables = ""
     for i in range(len(targets)):
         htmlTables = htmlTables + htmlTablesArray[i]
         
-    print(Bangumi.listToJson(episodesForAllTargets))
+    # to json
+    jsonStr = Bangumi.listToJson(episodesForAllTargets)
         
-    return htmlTables
+    return htmlTables, jsonStr
