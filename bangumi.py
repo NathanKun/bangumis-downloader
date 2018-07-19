@@ -20,6 +20,13 @@ class Bangumi:
         self.postUrl = postUrl
         self.searchUrl = searchUrl
         self.torrentUrl = torrentUrl
+        
+    def toJson(self):
+        return self.__dict__
+    
+    @staticmethod
+    def fromJson(jsonStr):
+        BangumiDecoder.decode(jsonStr)
 
     @staticmethod
     def listToJson(bangumis):
@@ -27,7 +34,7 @@ class Bangumi:
     
     @staticmethod
     def jsonToList(jsonStr):
-        BangumiDecoder.decode(jsonStr)
+        return BangumiDecoder.decode(jsonStr)
 
 
 class BangumiEncoder(JSONEncoder):

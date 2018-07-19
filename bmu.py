@@ -3,9 +3,9 @@ Bangumis Magnet Uri
 Crawl share.dmhy.org to get the magnet uris of my following bangumis
 """
 
-__author__ = "Junyang HE"
+__author__ = "NathanKun"
 __version__ = "1.0"
-__maintainer = "Junyang HE,"
+__maintainer = "NathanKun,"
 
 
 # targets to crawlSearchPage
