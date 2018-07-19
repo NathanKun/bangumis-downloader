@@ -7,9 +7,9 @@ Created on 18 juil. 2018
 import urllib.request
 from bs4 import BeautifulSoup
 from threading import Thread
-from logger import log
-from bangumi import *
-import htmlhelper
+from util.logger import log
+from model.bangumi import Bangumi
+from util import htmlhelper
 
 
 def crawlPostPage(episode: Bangumi, parentThreadIndex, index):

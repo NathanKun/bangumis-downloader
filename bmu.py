@@ -99,9 +99,9 @@ def main(argv):
 if __name__ == "__main__":
     import os, sys, getopt
     from bs4 import BeautifulSoup
-    import pathutil
-    from logger import log
-    from crawler import crawlTargets
-    import htmlhelper
+    from util import pathutil
+    from util.logger import log
+    from util.crawler import crawlTargets
+    from util import htmlhelper
     
     main(sys.argv[1:])

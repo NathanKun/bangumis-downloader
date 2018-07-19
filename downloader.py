@@ -104,8 +104,8 @@ if __name__ == "__main__":
     import urllib.request
     import json
     from baidupcsapi import PCS
-    from bangumi import Bangumi
-    from logger import log
-    import const
+    from model.bangumi import Bangumi
+    from util.logger import log
+    from model import const
     
     main()
