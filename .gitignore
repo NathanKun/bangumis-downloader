@@ -1,6 +1,7 @@
 # project
 const.py
 /log
+/torrent
 tasks.json
 *.cookies
 

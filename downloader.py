@@ -3,10 +3,12 @@ Created on 19 juil. 2018
 
 @author: jhe
 '''
+from util import baidunetdisk
 
 TASK_NEW = "TASK_NEW"
-TASK_LIXIAN_CREATED = "TASK_LIXIAN_CREATED"
-TASK_LIXIAN_DOWNLOADED = "TASK_LIXIAN_DOWNLOADED"
+TASK_TORRENT_DOWNLOADED = "TASK_TORRENT_DOWNLOADED"
+TASK_BAIDU_CREATED = "TASK_BAIDU_CREATED"
+TASK_BAIDU_DOWNLOADED = "TASK_BAIDU_DOWNLOADED"
 TASK_DOWNLOADING = "TASK_DOWNLOADING"
 TASK_DOWANLOADED = "TASK_DOWANLOADED"
 TASK_ERROR = "TASK_ERROR"
@@ -30,7 +32,14 @@ def readTasks():
         log("tasks.json not found, will create one")
         return {}
         
-        
+
+def downloadTorrent(url, file_name):
+    # Download the file from `url` and save it locally under `file_name`:
+    with urllib.request.urlopen(url) as response, open("torrent/" + file_name, 'wb') as out_file:
+        data = response.read() # a `bytes` object
+        out_file.write(data)
+
+
 def main():
     log("Downloader started")
     
@@ -73,14 +82,54 @@ def main():
         
     # login baidu net disk
     log("Logging in to baidu net disk")
-    pcs = PCS(const.username, const.password)
-    quota = pcs.quota().content.decode('utf-8')
-    if json.loads(quota)["errno"] != 0:
-        log("Error")
-        log("pcs.quota() returns:")
-        log(quota)
+    if not netdisk.login():
         log("Can't handle that yet, stopping...")
         return
+    log("Login OK")
+    
+    
+    # handle TASK_NEW
+    log("Handling TASK_NEW...")
+    if not os.path.exists("torrent"):
+        os.mkdir("torrent")
+    for title, value in tasks.items():
+        if value["status"] == TASK_NEW:
+            log(title + " is TASK_NEW, downloading torrent...")
+            
+            torrentUrl = value["bangumi"]["torrentUrl"]
+            urlSplited = torrentUrl.split("/")
+            torrentFileName = urlSplited[len(urlSplited) - 1]
+            downloadTorrent(torrentUrl, torrentFileName)
+            
+            tasks[title]["status"] = TASK_TORRENT_DOWNLOADED
+            tasks[title]["torrentFileName"] = torrentFileName
+            writeTasks(tasks)
+            
+            log(title + " torrent downloaded: " + torrentFileName)
+        
+        
+    # handle TASK_TORRENT_DOWNLOADED
+    log("Handling TASK_TORRENT_DOWNLOADED...")
+    for title, value in tasks.items():
+        if value["status"] == TASK_TORRENT_DOWNLOADED:
+            log(title + " is TASK_TORRENT_DOWNLOADED, creating baidu task...")
+            
+            torrentFileName = value["torrentFileName"]
+            baiduSavePath = "/bmu/" + title
+            
+            if not baidunetdisk.createBaiduTask("torrent/" + torrentFileName, baiduSavePath):
+                log(title + " createBaiduTask failed")
+            
+            
+            tasks[title]["status"] = TASK_BAIDU_CREATED
+            tasks[title]["baiduSavePath"] = baiduSavePath
+            writeTasks(tasks)
+            
+            log(title + " baidu task created")
+
+
+    log("Finished, stopping...")
+
 
 def except_hook(exctype, value, traceback):
     import traceback as tb
@@ -101,11 +150,10 @@ if __name__ == "__main__":
     import sys
     sys.excepthook = except_hook
     
+    import os, json
     import urllib.request
-    import json
-    from baidupcsapi import PCS
     from model.bangumi import Bangumi
     from util.logger import log
-    from model import const
+    import util.baidunetdisk as netdisk
     
     main()
