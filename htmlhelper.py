@@ -12,13 +12,15 @@ def bangumiToHtmlTableRow(bangumi):
             <td>{1}</td>
             <td><a href='{2}'>{3}</a></td>
             <td><a href='{4}'>magnet uri</a></td>
-            <td>{5}</td>
-            <td><a href='{6}'>Search</a></td>
+            <td><a href='{5}'>torrent</a></td>
+            <td>{6}</td>
+            <td><a href='{7}'>Search</a></td>
             </tr>'''.format(bangumi.uploadedAt,
                             bangumi.group,
                             bangumi.postUrl,
                             bangumi.title,
                             bangumi.magnetUri,
+                            bangumi.torrentUrl,
                             bangumi.size,
                             bangumi.searchUrl)
 
@@ -31,6 +33,7 @@ def combineRowsToTable(bangumiName, htmlRows):
                     <th>字幕组</th>
                     <th>标题📃</th>
                     <th>磁链</th>
+                    <th>种子</th>
                     <th>大小</th>
                     <th>搜索🔍</th>
                 </tr></thead>

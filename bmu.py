@@ -8,7 +8,7 @@ __version__ = "1.0"
 __maintainer = "Junyang HE,"
 
 
-# targets to crawl
+# targets to crawlSearchPage
 targets = [{
             "name": "骨傲天3",
             "url": "https://share.dmhy.org/topics/list?keyword=overlord+III+1080",
@@ -55,48 +55,6 @@ def handleInput(argv):
     return True, htmlSaveToPath
 
 
-def crawlTargets():
-    htmlTablesArray = [None] * len(targets)
-    threads = [None] * len(targets)
-    
-    # crawl one target function, save the result to "htmlTablesArray" object
-    def crawlOneTarget(results, index, target):
-        log("Thread {0} started".format(index))
-        if("keyword" in target):
-            episodes = crawl(target["url"], target["group"], target["keyword"])
-        else:
-            episodes = crawl(target["url"], target["group"])
-                              
-        if len(episodes) == 0:
-            log("Thread {0} stopped, no episode found".format(index))
-            return
-        
-        htmlRows = ""
-        for e in episodes:
-            htmlRows = htmlRows + e.toHtmlTableRow()
-            
-        htmlTable = htmlhelper.combineRowsToTable(target["name"], htmlRows)
-        results[index] = htmlTable
-        log("Thread {0} stopped, found {1} episode(s)".format(index, len(episodes)))
-    
-    # start a thread for each target
-    for i in range(len(targets)):
-        threads[i] = Thread(target=crawlOneTarget, args=(htmlTablesArray, i, targets[i]))
-        threads[i].start()
-    
-    # wait all threads to finish
-    for i in range(len(targets)):
-        threads[i].join()
-    
-    # concat all tables
-    htmlTables = ""
-    for i in range(len(targets)):
-        htmlTables = htmlTables + htmlTablesArray[i]
-        
-    
-        
-    return htmlTables
-
 def main(argv):
     
     # handle inputs
@@ -107,7 +65,7 @@ def main(argv):
     
     # Crawl
     log("Crawling...")
-    htmlTables = crawlTargets()
+    htmlTables = crawler.crawlTargets()
     
     
     # Generate result
@@ -133,11 +91,10 @@ def main(argv):
 
 if __name__ == "__main__":
     import os, sys, getopt
-    from threading import Thread
     from bs4 import BeautifulSoup
     import pathutil
     from logger import log
-    from crawler import crawl
+    import crawler
     import htmlhelper
     
     main(sys.argv[1:])
