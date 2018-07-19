@@ -10,7 +10,6 @@ from threading import Thread
 from logger import log
 from bangumi import Bangumi
 import htmlhelper
-from bmu import targets
 
 
 def crawlPostPage(episode: Bangumi, parentThreadIndex, index):
@@ -103,9 +102,7 @@ def crawlSearchPage(url: str, groupName: str, threadIndex, titleMustContains="")
     return episodes
     
 
-
-
-def crawlTargets():
+def crawlTargets(targets):
     htmlTablesArray = [None] * len(targets)
     threads = [None] * len(targets)
     
@@ -123,7 +120,7 @@ def crawlTargets():
         
         htmlRows = ""
         for e in episodes:
-            htmlRows = htmlRows + e.toHtmlTableRow()
+            htmlRows = htmlRows + htmlhelper.bangumiToHtmlTableRow(e)
             
         htmlTable = htmlhelper.combineRowsToTable(target["name"], htmlRows)
         results[index] = htmlTable

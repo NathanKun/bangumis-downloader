@@ -4,7 +4,6 @@ Created on 18 juil. 2018
 @author: NathanKun
 '''
 
-import htmlhelper
 
 class Bangumi:
     def __init__(self, uploadedAt: str, group: str, title: str, magnetUri: str, 
@@ -17,7 +16,3 @@ class Bangumi:
         self.postUrl = postUrl
         self.searchUrl = searchUrl
         self.torrentUrl = torrentUrl
-        
-    def toHtmlTableRow(self):
-        return htmlhelper.bangumiToHtmlTableRow(self)
-    

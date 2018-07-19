@@ -28,7 +28,7 @@ targets = [{
             "group": "YMDR"
         }, {
             "name": "天狼",
-            "url": "https://share.dmhy.org/topics/list?keyword=%E5%A4%A9%E7%8B%BC+1080", 
+            "url": "https://share.dmhy.org/topics/list?keyword=%E5%A4%A9%E7%8B%BC+1080",
             "group": "YMDR"
         }]
 
@@ -65,7 +65,7 @@ def main(argv):
     
     # Crawl
     log("Crawling...")
-    htmlTables = crawler.crawlTargets()
+    htmlTables = crawlTargets(targets)
     
     
     # Generate result
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     from bs4 import BeautifulSoup
     import pathutil
     from logger import log
-    import crawler
+    from crawler import crawlTargets
     import htmlhelper
     
     main(sys.argv[1:])

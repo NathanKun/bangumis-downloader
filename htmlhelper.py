@@ -4,6 +4,7 @@ Created on 18 juil. 2018
 @author: NathanKun
 '''
 
+
 import datetime
 
 def bangumiToHtmlTableRow(bangumi):
