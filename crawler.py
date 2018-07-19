@@ -8,12 +8,12 @@ import urllib.request
 from bs4 import BeautifulSoup
 from threading import Thread
 from logger import log
-from bangumi import Bangumi
+from bangumi import *
 import htmlhelper
 
 
 def crawlPostPage(episode: Bangumi, parentThreadIndex, index):
-    log("Thread {0}.{1} started".format(parentThreadIndex, index))
+    #log("Thread {0}.{1} started".format(parentThreadIndex, index))
     f = urllib.request.urlopen(episode.postUrl)  # request
     soup = BeautifulSoup(f.read().decode("utf-8"), "lxml")  # bs4
     
@@ -27,12 +27,12 @@ def crawlPostPage(episode: Bangumi, parentThreadIndex, index):
         
     episode.torrentUrl = torrentUrl
     
-    print(torrentUrl)
-    log("Thread {0}.{1} stopped".format(parentThreadIndex, index))
+    #log("Thread {0}.{1} stopped".format(parentThreadIndex, index))
     
-    
+
 def crawlSearchPage(url: str, groupName: str, threadIndex, titleMustContains=""):
     episodes = []  # to return all found Bangumi objects
+    
     f = urllib.request.urlopen(url)  # request
     soup = BeautifulSoup(f.read().decode("utf-8"), "lxml")  # bs4
     
@@ -83,6 +83,12 @@ def crawlSearchPage(url: str, groupName: str, threadIndex, titleMustContains="")
             episodes.append(Bangumi(uploadedAt, group, title, magnetUri, size, postUrl, url, ""))
         # if found: END
     # for tr in trs:
+    return episodes
+    
+    
+def crawlOneTarget(url: str, groupName: str, threadIndex, titleMustContains=""):
+    # crawl search page
+    episodes = crawlSearchPage(url, groupName, threadIndex, titleMustContains)
     
     if len(episodes) == 0:
         return episodes
@@ -105,14 +111,15 @@ def crawlSearchPage(url: str, groupName: str, threadIndex, titleMustContains="")
 def crawlTargets(targets):
     htmlTablesArray = [None] * len(targets)
     threads = [None] * len(targets)
+    episodesForAllTargets = []
     
-    # crawlSearchPage one target function, save the result to "htmlTablesArray" object
-    def crawlOneTarget(results, index, target):
+    # crawl one target function, save the result to "htmlTablesArray" object
+    def _crawl(results, index, target):
         log("Thread {0} started".format(index))
         if("keyword" in target):
-            episodes = crawlSearchPage(target["url"], target["group"], index, target["keyword"])
+            episodes = crawlOneTarget(target["url"], target["group"], index, target["keyword"])
         else:
-            episodes = crawlSearchPage(target["url"], target["group"], index)
+            episodes = crawlOneTarget(target["url"], target["group"], index)
                               
         if len(episodes) == 0:
             log("Thread {0} stopped, no episode found".format(index))
@@ -121,14 +128,16 @@ def crawlTargets(targets):
         htmlRows = ""
         for e in episodes:
             htmlRows = htmlRows + htmlhelper.bangumiToHtmlTableRow(e)
+            episodesForAllTargets.append(e)
             
         htmlTable = htmlhelper.combineRowsToTable(target["name"], htmlRows)
         results[index] = htmlTable
+        
         log("Thread {0} stopped, found {1} episode(s)".format(index, len(episodes)))
     
     # start a thread for each target
     for i in range(len(targets)):
-        threads[i] = Thread(target=crawlOneTarget, args=(htmlTablesArray, i, targets[i]))
+        threads[i] = Thread(target=_crawl, args=(htmlTablesArray, i, targets[i]))
         threads[i].start()
     
     # wait all threads to finish
@@ -140,6 +149,6 @@ def crawlTargets(targets):
     for i in range(len(targets)):
         htmlTables = htmlTables + htmlTablesArray[i]
         
-    
+    print(Bangumi.listToJson(episodesForAllTargets))
         
     return htmlTables
