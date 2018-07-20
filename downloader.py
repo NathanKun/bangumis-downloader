@@ -161,11 +161,12 @@ def main(argv):
             log(title + " torrent downloaded: " + torrentFileName)
         
         
-    # handle TASK_TORRENT_DOWNLOADED
-    log("Handling TASK_TORRENT_DOWNLOADED...")
+    # handle TASK_TORRENT_DOWNLOADED and TASK_DOWNLOADING
+    log("Handling TASK_TORRENT_DOWNLOADED and TASK_TORRENT_DOWNLOADING...")
     td = TorrentDownloader()
     for title, value in tasks.items():
-        if value["status"] == TASK_TORRENT_DOWNLOADED:
+        if value["status"] == TASK_TORRENT_DOWNLOADED or \
+            value["status"] == TASK_DOWNLOADING:
             '''
             log(title + " is TASK_TORRENT_DOWNLOADED, creating baidu task...")
             
@@ -182,7 +183,7 @@ def main(argv):
             
             log(title + " baidu task created")
             '''
-            torrentPath = "torrent/" + value["torrentFileName"]
+            torrentPath = savePath + "/torrent/" + value["torrentFileName"]
             savePathBangumi = savePath + "/" + value["bangumi"]["name"]
             
             log("Downloading " + title)

@@ -16,7 +16,7 @@ class TorrentDownloader:
     def download(self, torrentPath, savePath):
         info = lt.torrent_info(torrentPath)
         h = self.ses.add_torrent({'ti': info, 'save_path': savePath})
-        print('starting', h.name())
+        log('starting', h.name())
         
         while (not h.is_seed()):
             s = h.status()
@@ -30,5 +30,5 @@ class TorrentDownloader:
             
             time.sleep(1)
         
-        print(h.name(), 'complete')
+        log(h.name(), 'complete')
       
