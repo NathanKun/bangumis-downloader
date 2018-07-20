@@ -44,7 +44,10 @@ def main():
     log("Downloader started")
     
     # read tasks file
-    tasks = readTasks()
+    try:
+        tasks = readTasks()
+    except: # file not exists
+        tasks = {}
     
     '''
     # get online json
