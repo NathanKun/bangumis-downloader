@@ -30,7 +30,7 @@ def crawlPostPage(episode: Bangumi, parentThreadIndex, index):
     #log("Thread {0}.{1} stopped".format(parentThreadIndex, index))
     
 
-def crawlSearchPage(url: str, groupName: str, threadIndex, titleMustContains=""):
+def crawlSearchPage(url: str, groupName: str, bangumiName: str, threadIndex: int, titleMustContains=""):
     episodes = []  # to return all found Bangumi objects
     
     f = urllib.request.urlopen(url)  # request
@@ -80,15 +80,15 @@ def crawlSearchPage(url: str, groupName: str, threadIndex, titleMustContains="")
             magnetUri = tds[3].find("a")["href"]
             size = tds[4].string
             
-            episodes.append(Bangumi(uploadedAt, group, title, magnetUri, size, postUrl, url, ""))
+            episodes.append(Bangumi(uploadedAt, group, title, magnetUri, size, postUrl, url, "", bangumiName))
         # if found: END
     # for tr in trs:
     return episodes
     
     
-def crawlOneTarget(url: str, groupName: str, threadIndex, titleMustContains=""):
+def crawlOneTarget(url: str, groupName: str, bangumiName: str, threadIndex, titleMustContains=""):
     # crawl search page
-    episodes = crawlSearchPage(url, groupName, threadIndex, titleMustContains)
+    episodes = crawlSearchPage(url, groupName, bangumiName, threadIndex, titleMustContains)
     
     if len(episodes) == 0:
         return episodes
@@ -117,9 +117,9 @@ def crawlTargets(targets):
     def _crawl(results, index, target):
         log("Thread {0} started".format(index))
         if("keyword" in target):
-            episodes = crawlOneTarget(target["url"], target["group"], index, target["keyword"])
+            episodes = crawlOneTarget(target["url"], target["group"], target["name"], index, target["keyword"])
         else:
-            episodes = crawlOneTarget(target["url"], target["group"], index)
+            episodes = crawlOneTarget(target["url"], target["group"], target["name"], index)
                               
         if len(episodes) == 0:
             log("Thread {0} stopped, no episode found".format(index))

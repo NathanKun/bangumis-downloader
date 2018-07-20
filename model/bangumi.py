@@ -11,7 +11,7 @@ from json import JSONEncoder, JSONDecoder
 
 class Bangumi:
     def __init__(self, uploadedAt: str, group: str, title: str, magnetUri: str,
-                 size: str, postUrl: str, searchUrl: str, torrentUrl: str):
+                 size: str, postUrl: str, searchUrl: str, torrentUrl: str, name: str):
         self.uploadedAt = uploadedAt
         self.group = group
         self.title = title
@@ -20,6 +20,7 @@ class Bangumi:
         self.postUrl = postUrl
         self.searchUrl = searchUrl
         self.torrentUrl = torrentUrl
+        self.name = name
         
     def toJson(self):
         return self.__dict__
@@ -53,8 +54,9 @@ class BangumiDecoder():
         postUrl = jsonStr["postUrl"] if 'postUrl' in jsonStr else ""
         searchUrl = jsonStr["searchUrl"] if 'searchUrl' in jsonStr else ""
         torrentUrl = jsonStr["torrentUrl"] if 'torrentUrl' in jsonStr else ""
+        name = jsonStr["name"] if 'name' in jsonStr else ""
         
-        return Bangumi(uploadedAt, group, title, magnetUri, size, postUrl, searchUrl, torrentUrl)
+        return Bangumi(uploadedAt, group, title, magnetUri, size, postUrl, searchUrl, torrentUrl, name)
     
     @staticmethod
     def decode(json: str):

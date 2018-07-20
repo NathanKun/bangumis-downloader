@@ -2,6 +2,7 @@
 const.py
 /log
 /torrent
+/download
 tasks.json
 *.cookies
 

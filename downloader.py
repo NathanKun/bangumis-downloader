@@ -3,20 +3,20 @@ Created on 19 juil. 2018
 
 @author: jhe
 '''
-from util import baidunetdisk
+
 
 TASK_NEW = "TASK_NEW"
 TASK_TORRENT_DOWNLOADED = "TASK_TORRENT_DOWNLOADED"
 TASK_BAIDU_CREATED = "TASK_BAIDU_CREATED"
 TASK_BAIDU_DOWNLOADED = "TASK_BAIDU_DOWNLOADED"
 TASK_DOWNLOADING = "TASK_DOWNLOADING"
-TASK_DOWANLOADED = "TASK_DOWANLOADED"
+TASK_DOWNLOADED = "TASK_DOWNLOADED"
 TASK_ERROR = "TASK_ERROR"
 
 
 def writeTasks(t):
     with open("tasks.json", "w+", encoding='utf8') as f:
-        jsonStr = json.dumps(t, ensure_ascii=False)
+        jsonStr = json.dumps(t, indent=4, ensure_ascii=False)
         f.write(jsonStr)
     
     
@@ -46,12 +46,17 @@ def main():
     # read tasks file
     tasks = readTasks()
     
-    
+    '''
     # get online json
     log("Requesting bangumi list")
     f = urllib.request.urlopen("https://catprogrammer.com/bmu/bmu.json")  # request
     bangumis = Bangumi.jsonToList(f.read().decode("utf-8"))
+    '''
     
+    # Crawl targets
+    log("Requesting bangumi list...")
+    _, bangumis = crawlTargets(targets)
+    bangumis = Bangumi.jsonToList(bangumis)
     
     # update tasks
     for b in bangumis:
@@ -73,20 +78,20 @@ def main():
     # check if all downloaded
     allDownloaded = True
     for _, value in tasks.items():
-        if value["status"] != TASK_DOWANLOADED:
+        if value["status"] != TASK_DOWNLOADED:
             allDownloaded = False
     if allDownloaded:
         log("All bangumis have been downloaded, stopping...")
         return
         
-        
+    '''
     # login baidu net disk
     log("Logging in to baidu net disk")
     if not netdisk.login():
         log("Can't handle that yet, stopping...")
         return
     log("Login OK")
-    
+    '''
     
     # handle TASK_NEW
     log("Handling TASK_NEW...")
@@ -110,8 +115,10 @@ def main():
         
     # handle TASK_TORRENT_DOWNLOADED
     log("Handling TASK_TORRENT_DOWNLOADED...")
+    td = TorrentDownloader()
     for title, value in tasks.items():
         if value["status"] == TASK_TORRENT_DOWNLOADED:
+            '''
             log(title + " is TASK_TORRENT_DOWNLOADED, creating baidu task...")
             
             torrentFileName = value["torrentFileName"]
@@ -126,7 +133,20 @@ def main():
             writeTasks(tasks)
             
             log(title + " baidu task created")
-
+            '''
+            torrentPath = "torrent/" + value["torrentFileName"]
+            savePath = "download/" + value["bangumi"]["name"]
+            
+            log("Downloading " + title)
+            tasks[title]["status"] = TASK_DOWNLOADING
+            writeTasks(tasks)
+            
+            td.download(torrentPath, savePath)
+            
+            log("Downloaded " + title)
+            tasks[title]["status"] = TASK_DOWNLOADED
+            writeTasks(tasks)
+            
 
     log("Finished, stopping...")
 
@@ -152,8 +172,11 @@ if __name__ == "__main__":
     
     import os, json
     import urllib.request
-    from model.bangumi import Bangumi
     from util.logger import log
-    import util.baidunetdisk as netdisk
+    from util.torrentdownloader import TorrentDownloader
+    from util.crawler import crawlTargets
+    from bmu import targets
+    from model.bangumi import Bangumi
+    #import util.baidunetdisk as netdisk
     
     main()
