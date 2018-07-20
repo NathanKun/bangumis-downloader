@@ -1,8 +1,13 @@
-'''
-Created on 19 juil. 2018
+"""
+Bangumis Magnet Uri
+Crawl share.dmhy.org to get the magnet uris of my following bangumis.
+Find all episodes not downloaded, download its torrents, then download the bangumis.
+"""
 
-@author: jhe
-'''
+__author__ = "NathanKun"
+__version__ = "1.0"
+__maintainer = "NathanKun,"
+
 
 
 TASK_NEW = "TASK_NEW"
@@ -12,6 +17,30 @@ TASK_BAIDU_DOWNLOADED = "TASK_BAIDU_DOWNLOADED"
 TASK_DOWNLOADING = "TASK_DOWNLOADING"
 TASK_DOWNLOADED = "TASK_DOWNLOADED"
 TASK_ERROR = "TASK_ERROR"
+
+
+
+def handleInput(argv):
+    savePath = ''
+    opts, _ = getopt.getopt(argv, "hp:")
+    for opt, arg in opts:
+        if opt == "-h":
+            print("downloader.py [option]")
+            print(' -h Help')
+            print(' -p Path to save bangumis, required')
+            return False, ""
+        elif opt == "-p":
+            savePath = arg
+            if not pathutil.is_path_exists_or_creatable(savePath):
+                log("Path not valid")
+                return False, ""
+            log("Path to save bangumis: " + savePath)
+    
+    if savePath == '':
+        log("No path in input, use -p PATH to specify a folderto save bangumis.")
+        return False, ""
+    
+    return True, savePath
 
 
 def writeTasks(t):
@@ -33,15 +62,33 @@ def readTasks():
         return {}
         
 
-def downloadTorrent(url, file_name):
+def downloadTorrent(url, file_name, savePathTorrent):
     # Download the file from `url` and save it locally under `file_name`:
-    with urllib.request.urlopen(url) as response, open("torrent/" + file_name, 'wb') as out_file:
+    with urllib.request.urlopen(url) as response, open(savePathTorrent + file_name, 'wb') as out_file:
         data = response.read() # a `bytes` object
         out_file.write(data)
 
 
-def main():
+def main(argv):
+    
+    # handle inputs
+    try:
+        inputResult, savePath = handleInput(argv)
+        if not inputResult:
+            return
+    except getopt.GetoptError as e:
+        log("Error: " + e.msg)
+        return
+    
+    
     log("Downloader started")
+    
+    savePathTorrent = savePath + "/torrent/"
+    if not os.path.exists(savePath):
+        os.mkdir(savePath)
+    if not os.path.exists(savePathTorrent):
+        os.mkdir(savePathTorrent)
+    
     
     # read tasks file
     try:
@@ -98,8 +145,6 @@ def main():
     
     # handle TASK_NEW
     log("Handling TASK_NEW...")
-    if not os.path.exists("torrent"):
-        os.mkdir("torrent")
     for title, value in tasks.items():
         if value["status"] == TASK_NEW:
             log(title + " is TASK_NEW, downloading torrent...")
@@ -107,7 +152,7 @@ def main():
             torrentUrl = value["bangumi"]["torrentUrl"]
             urlSplited = torrentUrl.split("/")
             torrentFileName = urlSplited[len(urlSplited) - 1]
-            downloadTorrent(torrentUrl, torrentFileName)
+            downloadTorrent(torrentUrl, torrentFileName, savePathTorrent)
             
             tasks[title]["status"] = TASK_TORRENT_DOWNLOADED
             tasks[title]["torrentFileName"] = torrentFileName
@@ -138,13 +183,13 @@ def main():
             log(title + " baidu task created")
             '''
             torrentPath = "torrent/" + value["torrentFileName"]
-            savePath = "download/" + value["bangumi"]["name"]
+            savePathBangumi = savePath + "/" + value["bangumi"]["name"]
             
             log("Downloading " + title)
             tasks[title]["status"] = TASK_DOWNLOADING
             writeTasks(tasks)
             
-            td.download(torrentPath, savePath)
+            td.download(torrentPath, savePathBangumi)
             
             log("Downloaded " + title)
             tasks[title]["status"] = TASK_DOWNLOADED
@@ -173,13 +218,14 @@ if __name__ == "__main__":
     import sys
     sys.excepthook = except_hook
     
-    import os, json
+    import os, getopt, json
     import urllib.request
     from util.logger import log
     from util.torrentdownloader import TorrentDownloader
     from util.crawler import crawlTargets
+    from util import pathutil
     from bmu import targets
     from model.bangumi import Bangumi
     #import util.baidunetdisk as netdisk
     
-    main()
+    main(sys.argv[1:])

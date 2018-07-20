@@ -38,7 +38,7 @@ def handleInput(argv):
     opts, _ = getopt.getopt(argv, "hp:")
     for opt, arg in opts:
         if opt == "-h":
-            print("BangumisMagnetUri.py [option]")
+            print("bangumismagneturi.py [option]")
             print(' -h Help')
             print(' -p Path to save the html and the json file generated, if not specified, will print to output directly')
             return False, ""
