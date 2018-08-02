@@ -24,8 +24,9 @@ targets = [{
             "keyword": "GB"
         }, {
             "name": "杀戮天使",
-            "url": "https://share.dmhy.org/topics/list?keyword=angel+of+death+1080",
-            "group": "YMDR"
+            "url": "https://share.dmhy.org/topics/list?keyword=%E6%9D%80%E6%88%AE%E7%9A%84%E5%A4%A9%E4%BD%BF+1080",
+            #"group": "YMDR"
+            "group": "c.c动漫"
         }, {
             "name": "天狼",
             "url": "https://share.dmhy.org/topics/list?keyword=%E5%A4%A9%E7%8B%BC+1080",
