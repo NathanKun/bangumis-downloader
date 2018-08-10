@@ -30,7 +30,7 @@ targets = [{
         }, {
             "name": "天狼",
             "url": "https://share.dmhy.org/topics/list?keyword=%E5%A4%A9%E7%8B%BC+1080",
-            "group": "YMDR"
+            "group": "咪梦动漫组"
         }, {
             "name": "进击的巨人 第三季",
             "url": "https://share.dmhy.org/topics/list?keyword=%E8%BF%9B%E5%87%BB%E7%9A%84%E5%B7%A8%E4%BA%BA+%E7%AC%AC%E4%B8%89%E5%AD%A3+1080",
