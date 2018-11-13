@@ -35,5 +35,5 @@ A torrent folder will be created in the given path, for saving torrents of bangu
 For each target, a folder with the given name will be created, all episodes of this bangumi will be saved in this folder.  
 A task.json will be created in the project folder, for saving episodes downloaded.  
 
-### Automatation
+### Automation
 You can use unix crontab / windows task scheduler to run the script automatically multiple times per days.  Once a new episode is released, the downloader will find it and download it automatically.  
